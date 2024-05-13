@@ -1,24 +1,28 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useRecoilState } from "recoil";
+import TodoForm from "./components/Form";
+import TodoItems from "./components/TodoItems";
+import TodoItemsFilter from "./components/TodoItemsFilter";
+import { todosState } from "./lib/atom";
+import { useEffect } from "react";
 
 function App() {
+  const [todos, setTodos] = useRecoilState(todosState);
+
+  useEffect(() => {
+    const value = localStorage.getItem("todos");
+    if (value) setTodos(JSON.parse(value));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>TO DO</h1>
+      <TodoForm />
+      <TodoItemsFilter />
+      <TodoItems />
     </div>
   );
 }
