@@ -1,25 +1,33 @@
-import { useState } from "react";
 import { useSetRecoilState } from "recoil";
 import { TodoCategory, todosState } from "../lib/atom";
-import CategoryInput from "./input-category";
-import TodoInput from "./input-todo";
+import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+
+interface TodoInput {
+  category: TodoCategory;
+  todo: string;
+}
 
 export default function TodoForm() {
-  const [category, setCategory] = useState(TodoCategory.TO_DO);
-  const [todo, setTodo] = useState("");
   const setTodos = useSetRecoilState(todosState);
+  const {
+    setValue,
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<TodoInput>();
 
-  const handleRadio = (catetegory: TodoCategory) => {
-    setCategory(catetegory);
-  };
+  useEffect(() => {
+    setValue("category", TodoCategory.TO_DO);
+  }, []);
 
-  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
-    setTodo(e.currentTarget.value);
-  };
+  useEffect(() => {
+    console.log(errors);
+  }, [errors]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const onSubmit = ({ todo, category }: TodoInput) => {
     setTodos((prevTodos) => {
       const newTodos = [...prevTodos];
       const newTodo = {
@@ -28,18 +36,49 @@ export default function TodoForm() {
         category,
       };
       newTodos.push(newTodo);
-
       return newTodos;
     });
 
-    setTodo("");
+    
+    reset();
+    setValue("category", category);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <CategoryInput category={category} handleRadio={handleRadio} />
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div>
+        <input
+          {...register("category")}
+          type="radio"
+          value={TodoCategory.TO_DO}
+          id="TO_DO"
+        />
+        <label htmlFor="TO DO">TO DO</label>
+        <input
+          {...register("category")}
+          type="radio"
+          value={TodoCategory.DOING}
+          id="DOING"
+        />
+        <label htmlFor="DOING">DOING</label>
+        <input
+          {...register("category")}
+          type="radio"
+          value={TodoCategory.DONE}
+          id="DONE"
+        />
+        <label htmlFor="DONE">DONE</label>
+      </div>
 
-      <TodoInput todo={todo} handleInput={handleInput} />
+      <div>
+        <input
+          type="text"
+          placeholder="todo"
+          value={watch("todo")}
+          {...register("todo")}
+        />
+        <button type="submit">추가</button>
+      </div>
     </form>
   );
 }
